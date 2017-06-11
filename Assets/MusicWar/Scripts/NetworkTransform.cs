@@ -16,7 +16,7 @@ public class NetworkTransform : NetworkBehaviour
 
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
-            .Subscribe(_ => transform.position += (_syncPosition - transform.position)*0.016f);
+            .Subscribe(_ => transform.position += (_syncPosition - transform.position)*Time.deltaTime);
 
     }
 

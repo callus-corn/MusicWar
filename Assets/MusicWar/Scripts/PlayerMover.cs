@@ -19,8 +19,5 @@ public class PlayerMover : MonoBehaviour {
 
         _input.Move
             .Subscribe(move => _animator.SetFloat("Run", move.magnitude));
-
-        _input.LeftClick
-            .Subscribe(leftClick => transform.Rotate(0, 90, 0));
     }
 }
