@@ -2,18 +2,21 @@
 using UniRx;
 
 public class PlayerMover : MonoBehaviour {
+    IInputProvider _input;
+    Animator _animator;
 
-	void Start () {
-        var input = this.GetComponent<IInputProvider>();
-        var animator = this.GetComponent<Animator>();
+    private void Awake()
+    {
+        _input = this.GetComponent<IInputProvider>();
+        _animator = this.GetComponent<Animator>();
+    }
 
-
-        input.Move
+    void Start () {
+        _input.Move
             .Subscribe(move => {
                 var turn = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg - transform.localEulerAngles.y;
                 transform.Rotate(0,turn,0);
-                animator.SetFloat("Run",move.magnitude);
+                _animator.SetFloat("Run",move.magnitude);
             });
 	}
-	
 }
