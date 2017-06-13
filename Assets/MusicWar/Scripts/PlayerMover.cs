@@ -5,6 +5,8 @@ public class PlayerMover : MonoBehaviour {
     IInputProvider _input;
     Animator _animator;
 
+    const float _turnSpeed = 3;
+
     private void Awake()
     {
         _input = this.GetComponent<IInputProvider>();
@@ -12,12 +14,10 @@ public class PlayerMover : MonoBehaviour {
     }
 
     void Start () {
-        _input.Move
-            .Where(move => move.magnitude > 0.1)
-            .Select(move => Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg - transform.localEulerAngles.y)
-            .Subscribe(turn => transform.Rotate(0,turn,0));
+        _input.Turn
+            .Subscribe(turn => transform.Rotate(0,_turnSpeed*turn,0));
 
         _input.Move
-            .Subscribe(move => _animator.SetFloat("Run", move.magnitude));
+            .Subscribe(move => _animator.SetFloat("Run", move.z));
     }
 }

@@ -5,15 +5,28 @@ using UnityEngine.Networking;
 
 public class PlayerInput : NetworkBehaviour ,IInputProvider{
     public IReadOnlyReactiveProperty<Vector3> Move { get { return _move; } }
-    public IReadOnlyReactiveProperty<bool> LeftClick { get { return _leftClick; } }
+    public IReadOnlyReactiveProperty<bool> Attack { get { return _attack; } }
+    public IReadOnlyReactiveProperty<bool> Charge { get { return _charge; } }
+    public IReadOnlyReactiveProperty<float> Turn { get { return _turn; } }
+    public IReadOnlyReactiveProperty<float> CameraMove { get { return _cameraMove; } }
 
     private ReactiveProperty<Vector3> _move = new ReactiveProperty<Vector3>();
-    private ReactiveProperty<bool> _leftClick = new ReactiveProperty<bool>();
+    private ReactiveProperty<bool> _attack = new ReactiveProperty<bool>();
+    private ReactiveProperty<bool> _charge = new ReactiveProperty<bool>();
+    private ReactiveProperty<float> _turn = new ReactiveProperty<float>();
+    private ReactiveProperty<float> _cameraMove = new ReactiveProperty<float>();
 
     [SyncVar]
     private Vector3 _syncMove;
     [SyncVar]
-    private bool _syncLeftClick;
+    private bool _syncAttack;
+    [SyncVar]
+    private bool _syncCharge;
+    [SyncVar]
+    private float _syncTurn;
+    [SyncVar]
+    private float _syncCameraMove;
+
 
     [ClientCallback]
     void Start () {
@@ -25,15 +38,34 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
 
         this.UpdateAsObservable()
             .Where(_ => isLocalPlayer)
-            .Where(_ => Input.GetMouseButtonDown(0))
-            .Subscribe(_ => _leftClick.Value = !_leftClick.Value);
+            .Select(_ => Input.GetMouseButtonDown(0))
+            .Where(click => click )
+            .Subscribe(click => _attack.Value = !_attack.Value);
+
+        this.UpdateAsObservable()
+            .Where(_ => isLocalPlayer)
+            .Select(_ => Input.GetMouseButtonDown(1))
+            .Where(click => click)
+            .Subscribe(click => _charge.Value = !_charge.Value);
+
+        this.UpdateAsObservable()
+            .Where(_ => isLocalPlayer)
+            .Subscribe(_ => _turn.Value = Input.GetAxis("Mouse X"));
+
+        this.UpdateAsObservable()
+            .Where(_ => isLocalPlayer)
+            .Subscribe(_ => _cameraMove.Value = Input.GetAxis("Mouse Y"));
+
 
         //Synchronize
         this.UpdateAsObservable()
             .Where(_ => isLocalPlayer)
             .Subscribe(_ => {
                 CmdSynchronizeMove(_move.Value);
-                CmdSynchronizeLeftClick(_leftClick.Value);
+                CmdSynchronizeAttack(_attack.Value);
+                CmdSynchronizeCharge(_charge.Value);
+                CmdSynchronizeTurn(_turn.Value);
+                CmdSynchronizeCameraMove(_cameraMove.Value);
             });
 
         //NetworkInput
@@ -43,7 +75,19 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
 
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
-            .Subscribe(leftClick => _leftClick.Value = _syncLeftClick);
+            .Subscribe(leftClick => _attack.Value = _syncAttack);
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(leftClick => _charge.Value = _syncCharge);
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(_ => _turn.Value = _syncTurn);
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(_ => _cameraMove.Value = _syncCameraMove);
     }
 
     [Command]
@@ -53,8 +97,26 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     }
 
     [Command]
-    void CmdSynchronizeLeftClick(bool leftClick)
+    void CmdSynchronizeAttack(bool attack)
     {
-        _syncLeftClick = leftClick;
+        _syncAttack = attack;
+    }
+
+    [Command]
+    void CmdSynchronizeCharge(bool charge)
+    {
+        _syncCharge = charge;
+    }
+
+    [Command]
+    void CmdSynchronizeTurn(float turn)
+    {
+        _syncTurn = turn;
+    }
+
+    [Command]
+    void CmdSynchronizeCameraMove(float cameraMove)
+    {
+        _syncCameraMove = cameraMove;
     }
 }

@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 using UniRx;
 
-public interface IInputProvider {
+public interface IInputProvider
+{
     IReadOnlyReactiveProperty<Vector3> Move { get; }
-    IReadOnlyReactiveProperty<bool> LeftClick { get; }
+    IReadOnlyReactiveProperty<bool> Attack { get; }
+    IReadOnlyReactiveProperty<bool> Charge { get; }
+    IReadOnlyReactiveProperty<float> Turn { get; }
+    IReadOnlyReactiveProperty<float> CameraMove { get; }
 }
