@@ -1,5 +1,9 @@
-﻿public interface IBulletUsable
+﻿using UniRx;
+
+public interface IBulletUsable
 {
-    void UseBullet(float amount);
-    void ChargeBullet(float amount);
+    IReadOnlyReactiveProperty<float> Bullets { get ; }
+
+    void UseBullet();
+    void ChargeBullet();
 }

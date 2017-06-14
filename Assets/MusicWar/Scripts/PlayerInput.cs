@@ -7,12 +7,14 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     public IReadOnlyReactiveProperty<Vector3> Move { get { return _move; } }
     public IReadOnlyReactiveProperty<bool> Attack { get { return _attack; } }
     public IReadOnlyReactiveProperty<bool> Charge { get { return _charge; } }
+    public IReadOnlyReactiveProperty<bool> Change { get { return _change; } }
     public IReadOnlyReactiveProperty<float> Turn { get { return _turn; } }
     public IReadOnlyReactiveProperty<float> CameraMove { get { return _cameraMove; } }
 
     private ReactiveProperty<Vector3> _move = new ReactiveProperty<Vector3>();
     private ReactiveProperty<bool> _attack = new ReactiveProperty<bool>();
     private ReactiveProperty<bool> _charge = new ReactiveProperty<bool>();
+    private ReactiveProperty<bool> _change = new ReactiveProperty<bool>();
     private ReactiveProperty<float> _turn = new ReactiveProperty<float>();
     private ReactiveProperty<float> _cameraMove = new ReactiveProperty<float>();
 
@@ -22,6 +24,8 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     private bool _syncAttack;
     [SyncVar]
     private bool _syncCharge;
+    [SyncVar]
+    private bool _syncChange;
     [SyncVar]
     private float _syncTurn;
     [SyncVar]
@@ -50,6 +54,12 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
 
         this.UpdateAsObservable()
             .Where(_ => isLocalPlayer)
+            .Select(_ => Input.GetKeyDown(KeyCode.E))
+            .Where(e => e)
+            .Subscribe(e => _change.Value = !_change.Value);
+
+        this.UpdateAsObservable()
+            .Where(_ => isLocalPlayer)
             .Subscribe(_ => _turn.Value = Input.GetAxis("Mouse X"));
 
         this.UpdateAsObservable()
@@ -64,6 +74,7 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
                 CmdSynchronizeMove(_move.Value);
                 CmdSynchronizeAttack(_attack.Value);
                 CmdSynchronizeCharge(_charge.Value);
+                CmdSynchronizeChange(_change.Value);
                 CmdSynchronizeTurn(_turn.Value);
                 CmdSynchronizeCameraMove(_cameraMove.Value);
             });
@@ -79,7 +90,11 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
 
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
-            .Subscribe(leftClick => _charge.Value = _syncCharge);
+            .Subscribe(rightClick => _charge.Value = _syncCharge);
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(e => _change.Value = _syncChange);
 
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
@@ -107,6 +122,13 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     {
         _syncCharge = charge;
     }
+
+    [Command]
+    void CmdSynchronizeChange(bool change)
+    {
+        _syncChange = change;
+    }
+
 
     [Command]
     void CmdSynchronizeTurn(float turn)

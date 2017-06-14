@@ -7,7 +7,7 @@ public class CameraMover : MonoBehaviour {
     GameObject target;
     IInputProvider _input;
 
-    Vector3 _center = new Vector3(0, 1.6f, 0);
+    Vector3 _center = new Vector3(0, 2.0f, 0);
     const float _radius = 3;
     const float _cameraSpeed = -10;
 
