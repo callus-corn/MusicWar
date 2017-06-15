@@ -1,8 +1,14 @@
 ﻿using UnityEngine;
+using UniRx;
 
 public class CursorManager : MonoBehaviour {
 
-    bool hoge = true;
+    public bool hoge = true;
+
+    private void Start()
+    {
+        
+    }
 
     void Update()
     {

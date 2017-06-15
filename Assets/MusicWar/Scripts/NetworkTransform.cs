@@ -5,12 +5,19 @@ using UniRx.Triggers;
 
 public class NetworkTransform : NetworkBehaviour
 {
+    [SerializeField]
+    Transform _camera;
+    [SyncVar]
+    private Vector3 _syncCameraPosition;
+    [SyncVar]
+    private Quaternion _syncCameraRotation;
+
     [SyncVar]
     private Vector3 _syncPosition;
     [SyncVar]
     private Quaternion _syncRotation;
 
-	void Start ()
+    void Start()
     {
         this.UpdateAsObservable()
             .Where(_ => isLocalPlayer)
@@ -18,15 +25,33 @@ public class NetworkTransform : NetworkBehaviour
 
         this.UpdateAsObservable()
             .Where(_ => isLocalPlayer)
-            .Subscribe(_ => CmdSynchronizeRotetion(transform.rotation));
+            .Subscribe(_ => CmdSynchronizeRotation(transform.rotation));
+
+        this.UpdateAsObservable()
+            .Where(_ => isLocalPlayer)
+            .Subscribe(_ => CmdSynchronizeCameraPosition(_camera.position));
+
+        this.UpdateAsObservable()
+            .Where(_ => isLocalPlayer)
+            .Subscribe(_ => CmdSynchronizeCameraRotation(_camera.rotation));
+
 
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
-            .Subscribe(_ => transform.position += (_syncPosition - transform.position)*Time.deltaTime);
+            .Subscribe(_ => transform.position = Vector3.Lerp(transform.position, _syncPosition, Time.deltaTime));
 
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
-            .Subscribe(_ => transform.rotation = _syncRotation);
+            .Subscribe(_ => transform.rotation = Quaternion.RotateTowards(transform.rotation, _syncRotation, Time.deltaTime * 360));
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(_ => _camera.position = Vector3.Lerp(_camera.position, _syncCameraPosition, Time.deltaTime));
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(_ => _camera.rotation = Quaternion.RotateTowards(_camera.rotation, _syncCameraRotation, Time.deltaTime * 360));
+
     }
 
     [Command]
@@ -36,9 +61,20 @@ public class NetworkTransform : NetworkBehaviour
     }
 
     [Command]
-    void CmdSynchronizeRotetion(Quaternion rotation)
+    void CmdSynchronizeRotation(Quaternion rotation)
     {
         _syncRotation = rotation;
     }
 
+    [Command]
+    void CmdSynchronizeCameraPosition(Vector3 position)
+    {
+        _syncCameraPosition = position;
+    }
+
+    [Command]
+    void CmdSynchronizeCameraRotation(Quaternion rotation)
+    {
+        _syncCameraRotation = rotation;
+    }
 }

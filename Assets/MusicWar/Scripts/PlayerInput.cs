@@ -31,38 +31,51 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     [SyncVar]
     private float _syncCameraMove;
 
+    private CursorManager cursor;
+
+    private void Awake()
+    {
+        cursor = GameObject.Find("GameManager").GetComponent<CursorManager>();
+    }
+
 
     [ClientCallback]
     void Start () {
         //PlayerInput
         this.UpdateAsObservable()
+            .Where(_ => cursor.hoge)
             .Where(_ => isLocalPlayer)
             .Select(_ => new Vector3(Input.GetAxis("Horizontal"),0,Input.GetAxis("Vertical")))
             .Subscribe(move =>_move.Value = move);
 
         this.UpdateAsObservable()
+            .Where(_ => cursor.hoge)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetMouseButtonDown(0))
             .Where(click => click )
             .Subscribe(click => _attack.Value = !_attack.Value);
 
         this.UpdateAsObservable()
+            .Where(_ => cursor.hoge)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetMouseButtonDown(1))
             .Where(click => click)
             .Subscribe(click => _charge.Value = !_charge.Value);
 
         this.UpdateAsObservable()
+            .Where(_ => cursor.hoge)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetKeyDown(KeyCode.E))
             .Where(e => e)
             .Subscribe(e => _change.Value = !_change.Value);
 
         this.UpdateAsObservable()
+            .Where(_ => cursor.hoge)
             .Where(_ => isLocalPlayer)
             .Subscribe(_ => _turn.Value = Input.GetAxis("Mouse X"));
 
         this.UpdateAsObservable()
+            .Where(_ => cursor.hoge)
             .Where(_ => isLocalPlayer)
             .Subscribe(_ => _cameraMove.Value = Input.GetAxis("Mouse Y"));
 

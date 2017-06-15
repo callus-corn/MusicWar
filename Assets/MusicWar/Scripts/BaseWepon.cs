@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UniRx;
 using UniRx.Triggers;
-using System;
 
 public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
 {
@@ -11,7 +10,7 @@ public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
 
     protected abstract GameObject Bullet { get; }
     protected abstract GameObject User { get; }
-    protected abstract PlayerState UserState { get; }
+    protected abstract IStateProvider UserState { get; }
     protected abstract Damage BulletDamage { get; }
     protected abstract Damage ClubDamage { get; }
     protected abstract Vector3 BulletVelocity { get; }
@@ -20,8 +19,6 @@ public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
     protected abstract float MaxBullet { get; }
 
     protected WeponMode _weponMode = WeponMode.Club;
-
-    protected abstract Subject<bool> Collider { get; }
 
     public void UseBullet()
     {
@@ -48,11 +45,9 @@ public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
 
     public void Hit()
     {
-        Collider.OnNext(true);
-        Observable.Timer(TimeSpan.FromSeconds(10))
-            .Subscribe(_ => Collider.OnNext(false));
-
         this.OnTriggerEnterAsObservable()
+            .Where(_ => _weponMode == WeponMode.Club )
+            .Where(_ => UserState.IsAttacking() )
             .Where(collision => collision.gameObject.GetComponent<IDamageAppliable>() != null)
             .Select(collision => collision.gameObject.GetComponent<IDamageAppliable>())
             .Subscribe(collision => collision.ApplyDamage(ClubDamage));

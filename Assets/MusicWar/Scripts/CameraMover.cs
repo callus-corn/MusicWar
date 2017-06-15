@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UniRx;
-using UniRx.Triggers;
 
 public class CameraMover : MonoBehaviour {
     [SerializeField]
