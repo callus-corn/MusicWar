@@ -31,11 +31,9 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     [SyncVar]
     private float _syncCameraMove;
 
-    private CursorManager cursor;
-
-    private void Awake()
+    public override void OnStartLocalPlayer()
     {
-        cursor = GameObject.Find("GameManager").GetComponent<CursorManager>();
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
 
@@ -43,41 +41,50 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     void Start () {
         //PlayerInput
         this.UpdateAsObservable()
-            .Where(_ => cursor.hoge)
+            .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Select(_ => new Vector3(Input.GetAxis("Horizontal"),0,Input.GetAxis("Vertical")))
             .Subscribe(move =>_move.Value = move);
 
         this.UpdateAsObservable()
-            .Where(_ => cursor.hoge)
+            .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetMouseButtonDown(0))
             .Where(click => click )
             .Subscribe(click => _attack.Value = !_attack.Value);
 
         this.UpdateAsObservable()
-            .Where(_ => cursor.hoge)
+            .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetMouseButtonDown(1))
             .Where(click => click)
             .Subscribe(click => _charge.Value = !_charge.Value);
 
         this.UpdateAsObservable()
-            .Where(_ => cursor.hoge)
+            .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetKeyDown(KeyCode.E))
             .Where(e => e)
             .Subscribe(e => _change.Value = !_change.Value);
 
         this.UpdateAsObservable()
-            .Where(_ => cursor.hoge)
+            .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Subscribe(_ => _turn.Value = Input.GetAxis("Mouse X"));
 
         this.UpdateAsObservable()
-            .Where(_ => cursor.hoge)
+            .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Subscribe(_ => _cameraMove.Value = Input.GetAxis("Mouse Y"));
+
+        this.UpdateAsObservable()
+            .Where(_ => Input.GetKeyDown(KeyCode.Escape))
+            .Subscribe(_ => Cursor.lockState = CursorLockMode.None);
+
+        this.UpdateAsObservable()
+            .Where(_ => Cursor.lockState == CursorLockMode.None)
+            .Where(_ => Input.GetMouseButtonDown(0))
+            .Subscribe(_ => Cursor.lockState = CursorLockMode.Locked);
 
 
         //Synchronize

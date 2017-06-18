@@ -4,4 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/MusicWar/Scenes/offline.unity
+    guid: 28176f90b434bed4aabc6314db38a5d2
+  - enabled: 1
+    path: Assets/MusicWar/Scenes/Main.unity
+    guid: 25d3684017770be498b4d97a60702552
