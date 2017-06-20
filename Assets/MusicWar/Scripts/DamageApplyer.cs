@@ -2,7 +2,7 @@
 using UniRx;
 using UniRx.Triggers;
 
-public class BulletDamage : MonoBehaviour
+public class DamageApplyer : MonoBehaviour
 {
     public Damage Value { get; set; }
 

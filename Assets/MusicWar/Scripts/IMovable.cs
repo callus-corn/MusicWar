@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-interface IObjectMovable
+interface IMovable
 {
     void Move(Vector3 velocity);
 }

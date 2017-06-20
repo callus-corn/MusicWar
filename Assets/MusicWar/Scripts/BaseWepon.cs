@@ -5,6 +5,7 @@ using UniRx.Triggers;
 public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
 {
     public IReadOnlyReactiveProperty<float> Bullets { get { return Magazine; } }
+    public float MaxBullets { get { return MaxBullet; } }
 
     protected abstract ReactiveProperty<float> Magazine { get; }
 
@@ -27,10 +28,10 @@ public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
             Magazine.Value -= UseBulletAmount;
 
             var bullet = Instantiate<GameObject>(Bullet);
-            var bulletMover = bullet.GetComponent<IObjectMovable>();
-            var bulletDamage = bullet.GetComponent<BulletDamage>();
+            var bulletMover = bullet.GetComponent<IMovable>();
+            var damageApplyer = bullet.GetComponent<DamageApplyer>();
             bullet.transform.position = transform.position + BulletVelocity*Time.deltaTime;
-            bulletDamage.Value = BulletDamage;
+            damageApplyer.Value = BulletDamage;
             bulletMover.Move(BulletVelocity);
         }
     }

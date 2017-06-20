@@ -2,7 +2,7 @@
 using UniRx;
 using UniRx.Triggers;
 
-public class BulletMover : MonoBehaviour ,IObjectMovable
+public class BulletMover : MonoBehaviour ,IMovable
 {
 
     private void Start()

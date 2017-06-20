@@ -319,8 +319,8 @@ MonoBehaviour:
     type: 2}
   m_AutoCreatePlayer: 0
   m_PlayerSpawnMethod: 0
-  m_OfflineScene: offline
-  m_OnlineScene: Main
+  m_OfflineScene: 
+  m_OnlineScene: 
   m_SpawnPrefabs: []
   m_CustomConfig: 0
   m_MaxConnections: 4

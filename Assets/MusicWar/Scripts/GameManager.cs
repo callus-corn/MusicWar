@@ -3,22 +3,23 @@ using UnityEngine.Networking;
 
 public class GameManager : NetworkManager
 {
+    int test=0;
+
+    public override void OnServerConnect(NetworkConnection conn)
+    {
+        base.OnServerConnect(conn);
+        test++;
+        if (test > 1) StartBattle();
+    }
 
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
-        ClientScene.Ready(conn);
+        base.OnClientSceneChanged(conn);
         ClientScene.AddPlayer(0);
+    }
 
-        Debug.Log(ClientScene.localPlayers[0]);
-
-        var hpUI = GameObject.Find("Canvas/HP").GetComponent<HPUI>();
-        var magazineUI = GameObject.Find("Canvas/Magazine").GetComponent<MagazineUI>();
-        var timerUI = GameObject.Find("Canvas/Timer").GetComponent<TimerUI>();
-        var scoreUI = GameObject.Find("Canvas/Score").GetComponent<ScoreUI>();
-
-        hpUI.Initialize();
-        magazineUI.Initialize();
-        timerUI.Initialize();
-        scoreUI.Initialize();
+    private void StartBattle()
+    {
+        ServerChangeScene("MusicWar/Scenes/Main");
     }
 }
