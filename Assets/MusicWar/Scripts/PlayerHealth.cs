@@ -9,16 +9,12 @@ public class PlayerHealth : MonoBehaviour ,IDamageAppliable
 
     private IStateProvider _state;
 
-    private void Awake()
+    public void Initialize()
     {
         _state = this.GetComponent<IStateProvider>();
-    }
-
-    void Start ()
-    {
         _hp.Where(hp => hp <= 0)
-           .Subscribe(hp => _state.ToDead() );
-	}
+           .Subscribe(hp => _state.ToDead());
+    }
 
     public void ApplyDamage(Damage damage)
     {

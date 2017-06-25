@@ -1,19 +1,28 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Networking;
+using UniRx;
+using UniRx.Triggers;
 
 public class LocalObjects : NetworkBehaviour
 {
-    [SerializeField]
-    Behaviour[] behaviours;
+    List<Behaviour> behaviours;
 
-    void Start()
+    public void Initialize()
     {
-        if (!isLocalPlayer)
-        {
-            foreach (var behaviour in behaviours)
-            {
-                behaviour.enabled = false;
-            }
-        }
+
+        var _camera = transform.Find("PlayerCamera");
+
+        Debug.Log(transform);
+        Debug.Log(_camera);
+        Debug.Log(_camera.GetComponent<Camera>());
+
+        behaviours.Add(_camera.GetComponent<Camera>());
+        behaviours.Add(_camera.GetComponent<AudioListener>());
+
+        this.UpdateAsObservable()
+            .Where(_ => !isLocalPlayer)
+            .Subscribe(_ => behaviours.ForEach(behaviour => behaviour.enabled = false));
     }
+
 }

@@ -10,8 +10,8 @@ public class MagazineUI : MonoBehaviour
 
     public void Initialize()
     {
-        _localPlayer = ClientScene.localPlayers[0].gameObject;
-        _magazine = _localPlayer.transform.Find("Wepon").gameObject.GetComponent<IBulletUsable>();
+        var manager = GameObject.Find("GameManager").GetComponent<GameManager>();
+//        _magazine = manager.Player.transform.Find("Wepon").gameObject.GetComponent<IBulletUsable>();
 
         this.GetComponent<Text>().text = _magazine.Bullets.Value.ToString();
 

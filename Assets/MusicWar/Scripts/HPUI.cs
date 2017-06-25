@@ -10,8 +10,9 @@ public class HPUI : MonoBehaviour
 
     public void Initialize()
     {
-        _localPlayer = ClientScene.localPlayers[0].gameObject;
-        _hp = _localPlayer.GetComponent<IDamageAppliable>();
+        var manager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+//        _hp = manager.Player.GetComponent<IDamageAppliable>();
 
         this.GetComponent<Text>().text = _hp.HP.Value.ToString();
 

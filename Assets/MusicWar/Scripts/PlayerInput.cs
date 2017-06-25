@@ -31,26 +31,23 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     [SyncVar]
     private float _syncCameraMove;
 
-    public override void OnStartLocalPlayer()
+    public void Initialize()
     {
+
         Cursor.lockState = CursorLockMode.Locked;
-    }
 
-
-    [ClientCallback]
-    void Start () {
         //PlayerInput
         this.UpdateAsObservable()
             .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
-            .Select(_ => new Vector3(Input.GetAxis("Horizontal"),0,Input.GetAxis("Vertical")))
-            .Subscribe(move =>_move.Value = move);
+            .Select(_ => new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")))
+            .Subscribe(move => _move.Value = move);
 
         this.UpdateAsObservable()
             .Where(_ => Cursor.lockState == CursorLockMode.Locked)
             .Where(_ => isLocalPlayer)
             .Select(_ => Input.GetMouseButtonDown(0))
-            .Where(click => click )
+            .Where(click => click)
             .Subscribe(click => _attack.Value = !_attack.Value);
 
         this.UpdateAsObservable()

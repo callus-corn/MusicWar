@@ -12,8 +12,8 @@ public class ScoreUI : MonoBehaviour
 
     public void Initialize()
     {
-        _localPlayer = ClientScene.localPlayers[0].gameObject;
-        _input = _localPlayer.GetComponent<IInputProvider>();
+        var manager = GameObject.Find("GameManager").GetComponent<GameManager>();
+ //       _input = manager.Player.GetComponent<IInputProvider>();
 
         _input.Attack
             .Subscribe(_ => _score++);

@@ -21,6 +21,8 @@ public abstract class BaseWepon : MonoBehaviour, IBulletUsable, IHitable
 
     protected WeponMode _weponMode = WeponMode.Club;
 
+    public abstract void Initialize();
+
     public void UseBullet()
     {
         if (Magazine.Value >= UseBulletAmount)

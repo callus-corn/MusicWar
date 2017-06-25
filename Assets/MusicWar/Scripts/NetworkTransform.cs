@@ -5,20 +5,22 @@ using UniRx.Triggers;
 
 public class NetworkTransform : NetworkBehaviour
 {
-    [SerializeField]
     Transform _camera;
-    [SyncVar]
-    private Vector3 _syncCameraPosition;
-    [SyncVar]
-    private Quaternion _syncCameraRotation;
 
     [SyncVar]
-    private Vector3 _syncPosition;
+    Vector3 _syncCameraPosition;
     [SyncVar]
-    private Quaternion _syncRotation;
+    Quaternion _syncCameraRotation;
 
-    void Start()
+    [SyncVar]
+    Vector3 _syncPosition;
+    [SyncVar]
+    Quaternion _syncRotation;
+
+    public void Initialize()
     {
+        _camera = transform.Find("PlayerCamera").transform;
+
         this.UpdateAsObservable()
             .Where(_ => isLocalPlayer)
             .Subscribe(_ => CmdSynchronizePosition(transform.position));
@@ -51,7 +53,6 @@ public class NetworkTransform : NetworkBehaviour
         this.UpdateAsObservable()
             .Where(_ => !isLocalPlayer)
             .Subscribe(_ => _camera.rotation = Quaternion.RotateTowards(_camera.rotation, _syncCameraRotation, Time.deltaTime * 360));
-
     }
 
     [Command]

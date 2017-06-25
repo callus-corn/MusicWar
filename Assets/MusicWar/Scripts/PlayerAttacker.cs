@@ -7,18 +7,15 @@ public class PlayerAttacker : MonoBehaviour
     private IStateProvider _state;
     private BaseWepon _wepon;
 
-    private void Awake()
+    public void Initialize()
     {
         _input = this.GetComponent<IInputProvider>();
         _state = this.GetComponent<IStateProvider>();
         _wepon = transform.Find("Wepon").gameObject.GetComponent<BaseWepon>();
-    }
 
-    private void Start()
-    {
         _input.Attack
-            .Where(_ => _state.IsAttackable() )
-            .Subscribe(_ =>{
+            .Where(_ => _state.IsAttackable())
+            .Subscribe(_ => {
                 _state.ToAttacking();
                 _wepon.UseWepon();
             });

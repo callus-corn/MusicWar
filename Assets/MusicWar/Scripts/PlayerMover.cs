@@ -8,18 +8,15 @@ public class PlayerMover : MonoBehaviour {
     const float _turnSpeed = 3;
     const float _moveSpeed = 0.1f;
 
-    private void Awake()
+    public void Initialize()
     {
         _input = this.GetComponent<IInputProvider>();
-    }
 
-    void Start () {
         _input.Turn
-            .Subscribe(turn => transform.Rotate(0,_turnSpeed*turn,0));
+            .Subscribe(turn => transform.Rotate(0, _turnSpeed * turn, 0));
 
         this.UpdateAsObservable()
             .Select(_ => _input.Move.Value)
-            .Subscribe(move => transform.Translate( move * _moveSpeed));
-
+            .Subscribe(move => transform.Translate(move * _moveSpeed));
     }
 }

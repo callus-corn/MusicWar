@@ -29,17 +29,14 @@ public class Wepon : BaseWepon
     private const float _bulletSpped = 10.0f;
     private GameObject _camera;
 
-    private void Awake()
+    public override void Initialize()
     {
         _bullet = Resources.Load("Prefabs/Bullet") as GameObject;
         _user = transform.root.gameObject;
         _userState = _user.GetComponent<IStateProvider>();
         _camera = User.transform.Find("PlayerCamera").gameObject;
         _bulletVelocity = _camera.transform.forward * _bulletSpped;
-    }
 
-    private void Start()
-    {
         this.UpdateAsObservable()
             .Subscribe(_ => _bulletVelocity = _camera.transform.forward * _bulletSpped);
     }
