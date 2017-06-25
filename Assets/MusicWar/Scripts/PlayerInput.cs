@@ -34,7 +34,7 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
     public void Initialize()
     {
 
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.None;
 
         //PlayerInput
         this.UpdateAsObservable()
