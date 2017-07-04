@@ -4,5 +4,7 @@
     Attacking,
     Charging,
     Changing,
-    Running
+    Running,
+    Living,
+    Idling
 }

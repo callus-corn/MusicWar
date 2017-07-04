@@ -2,10 +2,9 @@
 
 public interface IStateProvider
 {
-    IReadOnlyReactiveProperty<Status> State { get; }
-
     bool IsAttacking();
     bool IsAttackable();
+    bool IsDead();
 
     void ToDead();
     void ToAttacking();

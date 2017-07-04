@@ -80,7 +80,7 @@ public class PlayerInput : NetworkBehaviour ,IInputProvider{
 
         this.UpdateAsObservable()
             .Where(_ => Cursor.lockState == CursorLockMode.None)
-            .Where(_ => Input.GetMouseButtonDown(0))
+            .Where(_ => Input.GetMouseButtonDown(1))
             .Subscribe(_ => Cursor.lockState = CursorLockMode.Locked);
 
 

@@ -5,13 +5,12 @@ using UniRx;
 
 public class MagazineUI : MonoBehaviour
 {
-    GameObject _localPlayer;
     IBulletUsable _magazine;
 
     public void Initialize()
     {
         var manager = GameObject.Find("GameManager").GetComponent<GameManager>();
-//        _magazine = manager.Player.transform.Find("Wepon").gameObject.GetComponent<IBulletUsable>();
+        _magazine = GameObject.Find(manager.ID).transform.Find("Wepon").gameObject.GetComponent<IBulletUsable>();
 
         this.GetComponent<Text>().text = _magazine.Bullets.Value.ToString();
 

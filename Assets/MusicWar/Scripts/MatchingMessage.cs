@@ -4,7 +4,7 @@ using UniRx;
 
 public class MatchingMessage : MessageBase
 {
-    public static int playableCount = 4;
-    public string[] users = new string[4] { "", "","","" };
+    public static int playableCount = 2;
+    public string[] users = new string[2] { "", ""};
     public int playerCount = 0;
 }

@@ -4,23 +4,37 @@ using System;
 
 public class PlayerState : MonoBehaviour, IStateProvider
 {
-    public IReadOnlyReactiveProperty<Status> State { get { return _state; } }
+    public Subject<bool> Respown = new Subject<bool>();
 
-    ReactiveProperty<Status> _state = new ReactiveProperty<Status>(Status.Running);
+    ReactiveProperty<Status> _lifeState = new ReactiveProperty<Status>(Status.Living);
+    ReactiveProperty<Status> _attackState = new ReactiveProperty<Status>(Status.Idling);
+    ReactiveProperty<Status> _moveState = new ReactiveProperty<Status>(Status.Idling);
 
-    public bool IsAttacking(){return _state.Value == Status.Attacking;}
-    public bool IsAttackable() { return _state.Value == Status.Running; }
+    public bool IsAttacking(){return _attackState.Value == Status.Attacking;}
+    public bool IsAttackable() { return _attackState.Value != Status.Attacking; }
+    public bool IsDead() { return _lifeState.Value == Status.Dead; }
 
-    public void ToDead() { _state.Value = Status.Dead; }
-    public void ToAttacking() { _state.Value = Status.Attacking; }
-    public void ToChanging() { _state.Value = Status.Changing; }
-    public void ToCharging() { _state.Value = Status.Charging; }
-    public void ToRunning() { _state.Value = Status.Running; }
+    public void ToDead() { _lifeState.Value = Status.Dead; }
+    public void ToAttacking() { _attackState.Value = Status.Attacking; }
+    public void ToChanging() { _attackState.Value = Status.Changing; }
+    public void ToCharging() { _attackState.Value = Status.Charging; }
+    public void ToRunning() { _moveState.Value = Status.Running; }
 
-    private void Update()
+    public void Initialize()
     {
-        _state.Where(state => !IsAttackable())
+        _lifeState.Value = Status.Living;
+        _attackState.Value = Status.Idling;
+        _moveState.Value = Status.Idling;
+
+        _attackState
+            .Where(state => !IsAttackable())
             .Delay(TimeSpan.FromMilliseconds(0.2))
-            .Subscribe(steta => _state.Value = Status.Running);
+            .Subscribe(steta => _attackState.Value = Status.Idling);
+
+        _lifeState
+            .Where(_ => IsDead())
+            .Delay(TimeSpan.FromMilliseconds(0.2))
+            .Subscribe(_ => Respown.OnNext(true));
     }
+
 }

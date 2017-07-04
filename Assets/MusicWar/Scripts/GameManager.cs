@@ -2,14 +2,18 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using UniRx;
 
 
 public class GameManager : NetworkManager
 {
     public string ID { get; set; }
-    public MatchingMessage matching = new MatchingMessage();
-    public List<ClientMessage> clientMessages = new List<ClientMessage>();
-    public List<NetworkConnection> connections = new List<NetworkConnection>();
+    public string[] MatchingUsers { get { return matching.users; } }
+    public Subject<List<ClientInfo>> Startable = new Subject<List<ClientInfo>>();
+
+    MatchingMessage matching = new MatchingMessage();
+    ClientMessage clientMessage = new ClientMessage();
+    List<ClientInfo> clientInfos = new List<ClientInfo>();
 
     int i = 0;
 
@@ -20,11 +24,14 @@ public class GameManager : NetworkManager
 
         NetworkServer.RegisterHandler(ClientMessageType.MSG_REGISTER, msg =>
         {
-            var message = msg.ReadMessage<ClientMessage>();
-            matching.users[matching.playerCount++] = message.id;
-            clientMessages.Add(message);
-            connections.Add(msg.conn);
-            msg.conn.Send(MatchingMessageType.MSG_MATCHING, matching);
+            if (matching.playerCount < MatchingMessage.playableCount)
+            {
+                var message = msg.ReadMessage<ClientMessage>();
+                message.team = clientInfos.Count() % 2;
+                matching.users[matching.playerCount++] = message.id;
+                clientInfos.Add(new ClientInfo(message, msg.conn));
+                msg.conn.Send(MatchingMessageType.MSG_MATCHING, matching);
+            }
         });
 
         NetworkServer.RegisterHandler(MatchingMessageType.MSG_MATCHING, msg =>
@@ -36,9 +43,9 @@ public class GameManager : NetworkManager
              if (matching.playerCount == MatchingMessage.playableCount)
              {
                  msg.conn.Send(MatchingMessageType.MSG_READY, matching);
-                 foreach (var cl in clientMessages)
+                 foreach (var ci in clientInfos)
                  {
-                     msg.conn.Send(ClientMessageType.MSG_READY,cl);
+                     msg.conn.Send(ClientMessageType.MSG_READY, ci.clientMessage);
                  }
              }
          });
@@ -48,63 +55,88 @@ public class GameManager : NetworkManager
             i++;
             if (i == MatchingMessage.playableCount)
             {
-                ServerChangeScene("MusicWar/Scenes/Main");
+                i = 0;
+                Invoke("Invokable", 1.0f);
             }
         });
+    }
+
+    void Invokable()
+    {
+        ServerChangeScene("MusicWar/Scenes/Main"); ;
     }
 
     public override void OnStartClient(NetworkClient client)
     {
         base.OnStartClient(client);
-        clientMessages.Add(new ClientMessage());
-        clientMessages[0].id = ID;
-        Debug.Log("startClient");
-    }
 
-    public void Ready()
-    {
         client.RegisterHandler(MatchingMessageType.MSG_MATCHING, msg => {
             matching = msg.ReadMessage<MatchingMessage>();
             client.Send(MatchingMessageType.MSG_MATCHING, matching);
         });
+
         client.RegisterHandler(MatchingMessageType.MSG_READY, msg => {
             matching = msg.ReadMessage<MatchingMessage>();
-            clientMessages.Clear();
+            clientInfos.Clear();
         });
+
         client.RegisterHandler(ClientMessageType.MSG_READY, msg => {
-            clientMessages.Add(msg.ReadMessage<ClientMessage>());
-            
-            if(clientMessages.Count == MatchingMessage.playableCount)
+            clientInfos.Add(new ClientInfo(msg.ReadMessage<ClientMessage>(), null));
+
+            if (clientInfos.Count == MatchingMessage.playableCount)
             {
-                msg.conn.Send(ClientMessageType.MSG_READY,clientMessages[0]);
+                msg.conn.Send(ClientMessageType.MSG_READY, clientInfos[0].clientMessage);
             }
         });
 
-        client.RegisterHandler(StartMessageType.MSG_START, msg =>{
-            GameObject.Find("GameController").GetComponent<GameController>().Initialize();
-        });
+        client.RegisterHandler(StartMessageType.MSG_START, msg => Startable.OnNext(clientInfos));
 
-
-        client.Send(ClientMessageType.MSG_REGISTER, clientMessages[0]);        
+        Debug.Log("startClient");
     }
 
-        public override void OnServerSceneChanged(string sceneName)
+    public void Ready(ClientMessage cm)
+    {
+        clientMessage = cm;
+        clientInfos.Add(new ClientInfo(cm, client.connection));
+    }
+
+    public void StartMatching()
+    {
+        client.Send(ClientMessageType.MSG_REGISTER, clientMessage);
+    }
+
+    public override void OnServerSceneChanged(string sceneName)
+    {
+        base.OnServerSceneChanged(sceneName);
+
+        switch (sceneName)
         {
-            base.OnServerSceneChanged(sceneName);
+            case "MusicWar/Scenes/Main":
+                StartMessage m = new StartMessage();
+                
 
-            for (int j = 0 ; j < connections.Count ; j++)
-            {
-                var prefab = Resources.Load("Prefabs/Ethan") as GameObject;
-                var player = Instantiate<GameObject>(prefab);
-                player.name = clientMessages[j].id;
+                foreach (var ci in clientInfos)
+                {
+                    var playerPrefab = Resources.Load(ci.clientMessage.modelName) as GameObject;
+                    var player = Instantiate<GameObject>(playerPrefab);
 
-                NetworkServer.AddPlayerForConnection(connections[j], player,0);
-            }
+                    NetworkServer.AddPlayerForConnection(ci.connection, player, 0);
+                }
 
-            var m = new StartMessage();
-            foreach (var co in connections)
-            {
-                co.Send(StartMessageType.MSG_START,m);
-            }
+                foreach (var ci in clientInfos)
+                {
+                    ci.connection.Send(StartMessageType.MSG_START, m);
+                }
+
+                matching.playerCount = 0;
+                matching.users[0] = "";
+                matching.users[1] = "";
+                clientInfos.Clear();
+
+                break;
+
+            default:
+                break;
         }
+    }
 }

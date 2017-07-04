@@ -37,7 +37,12 @@ public class Wepon : BaseWepon
         _camera = User.transform.Find("PlayerCamera").gameObject;
         _bulletVelocity = _camera.transform.forward * _bulletSpped;
 
+
+        RaycastHit hitInfo;
         this.UpdateAsObservable()
-            .Subscribe(_ => _bulletVelocity = _camera.transform.forward * _bulletSpped);
+            .Subscribe(_ => {
+                Physics.Raycast(_camera.transform.position,_camera.transform.forward,out hitInfo);
+                _bulletVelocity = (hitInfo.point - this.transform.position).normalized * _bulletSpped;
+            });
     }
 }

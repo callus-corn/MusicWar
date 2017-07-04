@@ -1,18 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
-using UniRx.Triggers;
 
 public class TimerUI : MonoBehaviour
 {
 
-    float _time = 300;
+    Timer timer;
 
     public void Initialize()
     {
-        this.UpdateAsObservable()
-            .Subscribe(_ => this.GetComponent<Text>().text = ((int)_time/60).ToString() + ":" + ((int)_time%60).ToString() );
-        this.UpdateAsObservable()
-            .Subscribe(_ => _time -= Time.deltaTime);
+        timer = GameObject.Find("GameController").GetComponent<Timer>();
+
+        timer.Time
+            .Subscribe(time => this.GetComponent<Text>().text = ((int)time / 60).ToString() + ":" + ((int)time % 60).ToString());
     }
 }
